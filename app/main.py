@@ -37,7 +37,7 @@ class HumanTakeoverRequest(BaseModel):
     decision: str  # "approved" or "denied"
     reason: str
 
-@app.get("/")
+@app.get("/api/info")
 def read_root():
     return {
         "service": "Ujima SACCO Multi-Agent Service",
@@ -169,27 +169,22 @@ def telemetry_status():
         "aggregate_metrics": {
             "total_applications": total_loans,
             "approved": approved_loans,
-            "denied": denied_loans,
             "escalated": escalated_loans
         }
     }
 
-
-# Serve static files (frontend)
-STATIC_DIR = Path(__file__).parent.parent / "static"
-if STATIC_DIR.exists():
-    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
-else:
-    print(f"⚠️  Warning: Static directory not found at {STATIC_DIR}")
-
-
-# Health check endpoint
 @app.get("/health")
 def health_check():
-    """Health check endpoint for deployment monitoring"""
+    """
+    Health check endpoint for deployment monitoring
+    """
     return {
         "status": "healthy",
         "service": "Ujima SACCO",
         "environment": os.getenv("APP_ENV", "development")
     }
 
+# Mount static files (frontend) - MUST be after all routes
+STATIC_DIR = Path(__file__).parent.parent / "static"
+if STATIC_DIR.exists():
+    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True))
