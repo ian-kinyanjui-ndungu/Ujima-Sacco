@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  ujima-sacco:
+    build: .
+    container_name: ujima-sacco-app
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=development
+      - DEBUG=True
+      - RELOAD=True
+      - HOST=0.0.0.0
+      - PORT=8000
+      - LOG_LEVEL=INFO
+    volumes:
+      - .:/app
+    command: python run.py
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # Optional: Add a reverse proxy (Nginx)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: ujima-sacco-nginx
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf
+  #   depends_on:
+  #     - ujima-sacco
+
+networks:
+  default:
+    name: ujima-sacco-network

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Application - Ujima SACCO</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <h1>🏦 Ujima SACCO</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="app.html" class="active">Apply for Loan</a></li>
+                <li><a href="dashboard.html">Member Dashboard</a></li>
+                <li><a href="admin-dashboard.html">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="form-section">
+            <div class="form-container">
+                <h2>Loan Application Form</h2>
+                <p class="form-description">Please provide your information for loan assessment</p>
+                
+                <form id="loanForm" class="loan-form">
+                    <!-- Personal Information -->
+                    <fieldset>
+                        <legend>Personal Information</legend>
+                        
+                        <div class="form-group">
+                            <label for="memberId">Member ID *</label>
+                            <input type="text" id="memberId" name="memberId" required placeholder="e.g., MEM-001">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" required placeholder="Your full name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gender">Gender</label>
+                            <select id="gender" name="gender">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="subCounty">Sub-County *</label>
+                            <input type="text" id="subCounty" name="subCounty" required placeholder="e.g., Busia Central">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tribe">Tribe/Community</label>
+                            <input type="text" id="tribe" name="tribe" placeholder="Optional">
+                        </div>
+                    </fieldset>
+
+                    <!-- Financial Information -->
+                    <fieldset>
+                        <legend>Financial Information</legend>
+
+                        <div class="form-group">
+                            <label for="isSalaried">Employment Status</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="isSalaried" value="true"> Salaried
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="isSalaried" value="false" checked> Self-employed/Farming
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="monthlySalary">Monthly Salary (if salaried) KES</label>
+                            <input type="number" id="monthlySalary" name="monthlySalary" placeholder="0" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cropType">Primary Crop Type (if farming)</label>
+                            <select id="cropType" name="cropType">
+                                <option value="">Select a crop</option>
+                                <option value="maize">Maize</option>
+                                <option value="matooke">Matooke (Plantain)</option>
+                                <option value="shea_butter">Shea Butter</option>
+                                <option value="rice">Rice</option>
+                                <option value="beans">Beans</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="harvestIncome">Average Harvest Income KES</label>
+                            <input type="number" id="harvestIncome" name="harvestIncome" placeholder="0" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="harvestMonth">Last Harvest Month</label>
+                            <input type="number" id="harvestMonth" name="harvestMonth" min="1" max="12" placeholder="Month (1-12)">
+                        </div>
+                    </fieldset>
+
+                    <!-- Household Information -->
+                    <fieldset>
+                        <legend>Household Information</legend>
+
+                        <div class="form-group">
+                            <label for="childAges">Children's Ages (comma-separated)</label>
+                            <input type="text" id="childAges" name="childAges" placeholder="e.g., 5, 8, 12">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tokenBalance">Current Token Balance KES</label>
+                            <input type="number" id="tokenBalance" name="tokenBalance" placeholder="0" min="0" value="0">
+                        </div>
+                    </fieldset>
+
+                    <!-- Loan Details -->
+                    <fieldset>
+                        <legend>Loan Details</legend>
+
+                        <div class="form-group">
+                            <label for="loanAmount">Requested Loan Amount (KES) *</label>
+                            <input type="number" id="loanAmount" name="loanAmount" required placeholder="Amount in KES" min="1000" max="500000">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="repaymentDate">Proposed Repayment Date *</label>
+                            <input type="date" id="repaymentDate" name="repaymentDate" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="loanPurpose">Loan Purpose</label>
+                            <textarea id="loanPurpose" name="loanPurpose" rows="3" placeholder="Describe what you'll use the loan for"></textarea>
+                        </div>
+                    </fieldset>
+
+                    <!-- Terms & Conditions -->
+                    <fieldset>
+                        <legend>Terms & Conditions</legend>
+                        <div class="form-group checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
+                                I agree to Ujima SACCO terms and conditions and Kenya Data Protection Act 2022 compliance
+                            </label>
+                        </div>
+                    </fieldset>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Submit Application</button>
+                        <button type="reset" class="btn btn-secondary">Clear Form</button>
+                    </div>
+                </form>
+
+                <!-- Application Response -->
+                <div id="responseContainer" class="response-container" style="display: none;">
+                    <div id="responseAlert" class="alert"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Ujima SACCO. Kenya Data Protection Act 2022 Compliant. All rights reserved.</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        // Handle loan application form submission
+        document.getElementById('loanForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                member_id: document.getElementById('memberId').value,
+                name: document.getElementById('name').value,
+                sub_county: document.getElementById('subCounty').value,
+                gender: document.getElementById('gender').value,
+                tribe: document.getElementById('tribe').value,
+                is_salaried: document.getElementById('isSalaried').checked || false,
+                monthly_salary: parseFloat(document.getElementById('monthlySalary').value) || 0,
+                crop_type: document.getElementById('cropType').value,
+                average_harvest_income: parseFloat(document.getElementById('harvestIncome').value) || 0,
+                last_harvest_month: parseInt(document.getElementById('harvestMonth').value) || null,
+                estimated_child_ages: document.getElementById('childAges').value.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x)),
+                current_token_balance: parseFloat(document.getElementById('tokenBalance').value) || 0,
+                loan_amount: parseFloat(document.getElementById('loanAmount').value),
+                repayment_date: document.getElementById('repaymentDate').value,
+                loan_purpose: document.getElementById('loanPurpose').value
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/sms/inbound', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        member_id: formData.member_id,
+                        text: `LOAN_APPLICATION: Amount=${formData.loan_amount}, RepaymentDate=${formData.repayment_date}, Purpose=${formData.loan_purpose}`,
+                        sub_county: formData.sub_county
+                    })
+                });
+
+                const data = await response.json();
+                showResponse('success', `Application submitted successfully! Response: ${data.text}`);
+                document.getElementById('loanForm').reset();
+            } catch (error) {
+                showResponse('error', `Error submitting application: ${error.message}`);
+            }
+        });
+
+        function showResponse(type, message) {
+            const container = document.getElementById('responseContainer');
+            const alert = document.getElementById('responseAlert');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = message;
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Ujima SACCO</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <h1>🏦 Ujima SACCO</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="app.html">Apply for Loan</a></li>
+                <li><a href="dashboard.html">Member Dashboard</a></li>
+                <li><a href="admin-dashboard.html" class="active">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="admin-section">
+            <h2>Loan Officer Dashboard</h2>
+
+            <!-- System Telemetry -->
+            <div class="telemetry-section">
+                <h3>System Telemetry & Metrics</h3>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <h4>Total Applications</h4>
+                        <p class="metric-value" id="totalApps">0</p>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Approved Loans</h4>
+                        <p class="metric-value" id="approvedApps">0</p>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Denied Loans</h4>
+                        <p class="metric-value" id="deniedApps">0</p>
+                    </div>
+                    <div class="metric-card">
+                        <h4>Escalated Cases</h4>
+                        <p class="metric-value" id="escalatedApps">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Anomaly Alerts -->
+            <div class="alerts-section">
+                <h3>⚠️ Anomaly Alerts</h3>
+                <div id="alertsContainer" class="alerts-container">
+                    <p>No alerts at this time</p>
+                </div>
+            </div>
+
+            <!-- Review Queue -->
+            <div class="queue-section">
+                <h3>Loan Applications Pending Human Review</h3>
+                <button onclick="refreshQueue()" class="btn btn-secondary">Refresh Queue</button>
+                <div id="queueContainer" class="queue-container">
+                    <p>Loading...</p>
+                </div>
+            </div>
+
+            <!-- Compliance Configuration -->
+            <div class="config-section">
+                <h3>Compliance Configuration</h3>
+                <div class="config-panel">
+                    <div class="config-item">
+                        <label>Storage Region:</label>
+                        <span id="configRegion">-</span>
+                    </div>
+                    <div class="config-item">
+                        <label>Data Protection Standard:</label>
+                        <span>Kenya Data Protection Act 2022</span>
+                    </div>
+                    <div class="config-item">
+                        <label>System Status:</label>
+                        <span class="status-badge status-active">Active</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Application Review -->
+    <div id="reviewModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeReviewModal()">&times;</span>
+            <h2>Review Application</h2>
+            
+            <div class="review-details">
+                <div class="detail-item">
+                    <label>Member ID:</label>
+                    <span id="reviewMemberId">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Member Name:</label>
+                    <span id="reviewMemberName">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Loan Amount:</label>
+                    <span id="reviewLoanAmount">-</span>
+                </div>
+                <div class="detail-item">
+                    <label>Repayment Date:</label>
+                    <span id="reviewRepaymentDate">-</span>
+                </div>
+            </div>
+
+            <div class="briefing-panel">
+                <h3>Briefing Packet</h3>
+                <div id="briefingContent" class="briefing-content">
+                    Loading...
+                </div>
+            </div>
+
+            <div class="decision-form">
+                <h3>Make Decision</h3>
+                <div class="form-group">
+                    <label>Decision:</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="decision" value="approved"> Approve Loan
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="decision" value="denied"> Deny Loan
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="decisionReason">Reason for Decision:</label>
+                    <textarea id="decisionReason" rows="4" placeholder="Explain your decision"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button onclick="submitDecision()" class="btn btn-primary">Submit Decision</button>
+                    <button onclick="closeReviewModal()" class="btn btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2026 Ujima SACCO. Kenya Data Protection Act 2022 Compliant. All rights reserved.</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        let currentReviewMemberId = null;
+
+        // Load initial data
+        loadTelemetryData();
+        refreshQueue();
+
+        async function loadTelemetryData() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/telemetry/status');
+                const data = await response.json();
+
+                document.getElementById('totalApps').textContent = data.aggregate_metrics?.total_applications || 0;
+                document.getElementById('approvedApps').textContent = data.aggregate_metrics?.approved_loans || 0;
+                document.getElementById('deniedApps').textContent = data.aggregate_metrics?.denied_loans || 0;
+                document.getElementById('escalatedApps').textContent = data.aggregate_metrics?.escalated_loans || 0;
+                document.getElementById('configRegion').textContent = data.sovereign_configuration?.STORAGE_REGION || 'East Africa';
+
+                // Display anomaly alerts
+                displayAnomalies(data.anomaly_alerts || []);
+            } catch (error) {
+                console.error('Error loading telemetry:', error);
+            }
+        }
+
+        function displayAnomalies(alerts) {
+            const container = document.getElementById('alertsContainer');
+            if (!alerts || alerts.length === 0) {
+                container.innerHTML = '<p>No alerts at this time</p>';
+                return;
+            }
+
+            container.innerHTML = alerts.map(alert => `
+                <div class="alert-item alert-${alert.severity || 'info'}">
+                    <strong>${alert.type || 'Alert'}</strong>: ${alert.message || ''}
+                </div>
+            `).join('');
+        }
+
+        async function refreshQueue() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/human/queue');
+                const queue = await response.json();
+
+                const container = document.getElementById('queueContainer');
+                
+                if (!queue || queue.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; padding: 20px;">No applications pending review</p>';
+                    return;
+                }
+
+                container.innerHTML = queue.map(app => `
+                    <div class="queue-item">
+                        <div class="queue-info">
+                            <h4>${app.name}</h4>
+                            <p><strong>Member ID:</strong> ${app.member_id}</p>
+                            <p><strong>Loan Amount:</strong> KES ${(app.loan_amount || 0).toFixed(2)}</p>
+                            <p><strong>Repayment Date:</strong> ${app.repayment_date || 'N/A'}</p>
+                            <p><strong>Current Agent:</strong> ${app.current_agent || 'Unknown'}</p>
+                        </div>
+                        <button onclick="openReviewModal('${app.member_id}', '${app.name}', ${app.loan_amount}, '${app.repayment_date}')" class="btn btn-primary">Review</button>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading queue:', error);
+                document.getElementById('queueContainer').innerHTML = '<p>Error loading queue</p>';
+            }
+        }
+
+        function openReviewModal(memberId, name, loanAmount, repaymentDate) {
+            currentReviewMemberId = memberId;
+            document.getElementById('reviewMemberId').textContent = memberId;
+            document.getElementById('reviewMemberName').textContent = name;
+            document.getElementById('reviewLoanAmount').textContent = 'KES ' + loanAmount.toFixed(2);
+            document.getElementById('reviewRepaymentDate').textContent = repaymentDate;
+            
+            // Load briefing packet (mock data for now)
+            document.getElementById('briefingContent').innerHTML = `
+                <p><strong>Financial Summary:</strong></p>
+                <p>Member profile and financial history would appear here.</p>
+                <p>The Hunter Agent's analysis and recommendations would be displayed in this section.</p>
+            `;
+
+            document.getElementById('reviewModal').style.display = 'block';
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').style.display = 'none';
+            currentReviewMemberId = null;
+        }
+
+        async function submitDecision() {
+            const decision = document.querySelector('input[name="decision"]:checked');
+            const reason = document.getElementById('decisionReason').value;
+
+            if (!decision) {
+                alert('Please select a decision');
+                return;
+            }
+
+            if (!reason.trim()) {
+                alert('Please provide a reason for your decision');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/human/takeover', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        member_id: currentReviewMemberId,
+                        decision: decision.value,
+                        reason: reason
+                    })
+                });
+
+                const data = await response.json();
+                alert('Decision submitted successfully!\n\nSMS Response: ' + data.sms_response);
+                closeReviewModal();
+                refreshQueue();
+                loadTelemetryData();
+            } catch (error) {
+                alert('Error submitting decision: ' + error.message);
+            }
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('reviewModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Auto-refresh telemetry every 30 seconds
+        setInterval(loadTelemetryData, 30000);
+    </script>
+</body>
+</html>

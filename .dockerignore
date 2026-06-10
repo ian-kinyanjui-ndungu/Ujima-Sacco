@@ -1,0 +1,36 @@
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+.pytest_cache
+.coverage
+htmlcov
+venv
+.venv
+env
+build
+dist
+
+# IDE & OS
+.vscode
+.idea
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Project specific
+.env
+.git
+.gitignore
+*.db
+logs
+tests
+frontend
+DEPLOYMENT.md
+
+# Documentation
+docs
+*.md
+!README.md

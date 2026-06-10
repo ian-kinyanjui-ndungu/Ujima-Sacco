@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Dashboard - Ujima SACCO</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <h1>🏦 Ujima SACCO</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="app.html">Apply for Loan</a></li>
+                <li><a href="dashboard.html" class="active">Member Dashboard</a></li>
+                <li><a href="admin-dashboard.html">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="dashboard-section">
+            <h2>Member Dashboard</h2>
+            
+            <!-- Member Lookup -->
+            <div class="lookup-panel">
+                <h3>Check Your Application Status</h3>
+                <div class="lookup-form">
+                    <input type="text" id="lookupMemberId" placeholder="Enter your Member ID" class="form-control">
+                    <button onclick="lookupMemberStatus()" class="btn btn-primary">Search</button>
+                </div>
+            </div>
+
+            <!-- Member Profile -->
+            <div id="profileSection" style="display: none;" class="dashboard-grid">
+                <div class="card">
+                    <h3>Member Profile</h3>
+                    <div class="profile-info">
+                        <div class="info-item">
+                            <label>Member ID:</label>
+                            <span id="profileMemberId">-</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Name:</label>
+                            <span id="profileName">-</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Sub-County:</label>
+                            <span id="profileSubCounty">-</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Token Balance:</label>
+                            <span id="profileTokenBalance">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Loan Application Status</h3>
+                    <div id="loanStatus" class="loan-status">
+                        <p>No active loan application</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Conversation History</h3>
+                    <div id="conversationHistory" class="conversation-box" style="max-height: 400px; overflow-y: auto;">
+                        <p>No conversation history</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Financial Summary</h3>
+                    <div class="financial-summary">
+                        <div class="summary-item">
+                            <label>Monthly Salary:</label>
+                            <span id="summaryMonthlySalary">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Average Harvest Income:</label>
+                            <span id="summaryHarvestIncome">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Crop Type:</label>
+                            <span id="summaryCropType">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <label>Financial Stress Flags:</label>
+                            <span id="summaryStressFlags">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SMS Chat Interface -->
+            <div class="chat-section">
+                <h3>SMS Communication with SACCO Agent</h3>
+                <div class="chat-container">
+                    <div id="chatBox" class="chat-box">
+                        <p class="chat-welcome">Welcome to Ujima SACCO SMS Support. Enter your member ID to start chatting.</p>
+                    </div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chatInput" placeholder="Send your message..." disabled class="form-control">
+                        <button id="sendChatBtn" onclick="sendSmsMessage()" disabled class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 Ujima SACCO. Kenya Data Protection Act 2022 Compliant. All rights reserved.</p>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        let currentMemberId = null;
+
+        async function lookupMemberStatus() {
+            const memberId = document.getElementById('lookupMemberId').value.trim();
+            if (!memberId) {
+                alert('Please enter a Member ID');
+                return;
+            }
+
+            currentMemberId = memberId;
+
+            try {
+                // Fetch member profile and state
+                const response = await fetch(`http://127.0.0.1:8000/member/${memberId}`);
+                if (!response.ok && response.status !== 404) {
+                    throw new Error('Failed to fetch member data');
+                }
+
+                const profileSection = document.getElementById('profileSection');
+                profileSection.style.display = 'grid';
+
+                // Enable chat interface
+                document.getElementById('chatInput').disabled = false;
+                document.getElementById('sendChatBtn').disabled = false;
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayMemberProfile(data);
+                } else {
+                    // Initialize empty profile
+                    document.getElementById('profileMemberId').textContent = memberId;
+                    document.getElementById('profileName').textContent = 'New Member';
+                    document.getElementById('loanStatus').innerHTML = '<p>No loan application yet. <a href="app.html">Apply now</a></p>';
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function displayMemberProfile(data) {
+            document.getElementById('profileMemberId').textContent = data.member_id || '-';
+            document.getElementById('profileName').textContent = data.name || '-';
+            document.getElementById('profileSubCounty').textContent = data.sub_county || '-';
+            document.getElementById('profileTokenBalance').textContent = (data.current_token_balance || 0).toFixed(2) + ' KES';
+
+            document.getElementById('summaryMonthlySalary').textContent = (data.monthly_salary || 0).toFixed(2) + ' KES';
+            document.getElementById('summaryHarvestIncome').textContent = (data.average_harvest_income || 0).toFixed(2) + ' KES';
+            document.getElementById('summaryCropType').textContent = data.crop_type || 'None';
+            document.getElementById('summaryStressFlags').textContent = data.financial_stress_flags?.join(', ') || 'None';
+        }
+
+        async function sendSmsMessage() {
+            const message = document.getElementById('chatInput').value.trim();
+            if (!message || !currentMemberId) return;
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/sms/inbound', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        member_id: currentMemberId,
+                        text: message,
+                        sub_county: 'Busia Central'
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Display messages in chat
+                const chatBox = document.getElementById('chatBox');
+                chatBox.innerHTML += `<div class="chat-message user-message">You: ${message}</div>`;
+                chatBox.innerHTML += `<div class="chat-message agent-message">Agent: ${data.text}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                document.getElementById('chatInput').value = '';
+            } catch (error) {
+                alert('Error sending message: ' + error.message);
+            }
+        }
+
+        // Allow Enter key to send message
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendSmsMessage();
+            }
+        });
+    </script>
+</body>
+</html>
